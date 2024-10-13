@@ -39,3 +39,6 @@ class SimpleMovingAverage:
                 df_sma.at[i, 'signal'] = -1  # Sell signal
 
         return df_sma
+    
+class ExponentialMovingAverage:
+    
