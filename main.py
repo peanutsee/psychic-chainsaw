@@ -1,5 +1,4 @@
 from src.backtesting import *
-from src.strategy import *
 import pandas as pd
 from yahoo_fin.stock_info import get_data
 
@@ -9,6 +8,12 @@ if __name__ == "__main__":
     start_date = '01/01/2024'
     end_date = '10/14/24'
     interval = '1d'
+    strategies = [
+        (3, 5), (3, 10), (3, 20), (3, 50),
+        (5, 10), (5, 20), (5, 50), (5, 100),
+        (10, 20), (10, 50)
+    ]
+
     
     # Get data
     df = get_data(ticker, 
@@ -22,17 +27,11 @@ if __name__ == "__main__":
     
     # Initialize objects
     obj_backtesting = Backtesting(starting_fund)
-    obj_sma = SimpleMovingAverage(3, 50)
-    obj_ema = ExponentialMovingAverage(3, 50)
     
     # Run sma
-    df_sma = obj_sma.sma(df)
+    dct_sma = obj_backtesting.test_strategy('sma', df, strategies, 0)
     
     # Run ema
-    df_ema = obj_ema.ema(df)
+    dct_ema = obj_backtesting.test_strategy('ema', df, strategies, 0)
     
-    # Run backtest
-    final_fund_sma = obj_backtesting.test(df_sma)
-    final_fund_ema = obj_backtesting.test(df_ema)
-    
-    print(f"SMA: S${final_fund_sma}\nEMA: S${final_fund_ema}")
+    print(f"SMA: S${dct_sma.get("fund")} {dct_sma.get('best')}\nEMA: S${dct_ema.get("fund")} {dct_ema.get("best")}")
