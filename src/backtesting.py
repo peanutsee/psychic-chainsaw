@@ -43,6 +43,7 @@ class Backtesting:
         
         best_window = None
         prev_final = None
+        best_df = None
         for window in windows:
             short_window, long_window = window
             tmp_df = self._apply_strategy(strategy, df, window)
@@ -54,12 +55,28 @@ class Backtesting:
             if best_window is None:
                 best_window = window
                 prev_final = final_fund
+                best_df = tmp_df
             else:
                 if final_fund > prev_final:
                     prev_final = final_fund
                     best_window = window
+                    best_df = tmp_df
             
         return {
             "best": best_window,
-            "fund": prev_final
+            "fund": prev_final,
+            "best_df": best_df
         }
+    
+    def show_signals(self, df: pd.DataFrame, latest: bool = False) -> type[list, tuple]:
+        lst_signal_date = []
+
+        for _, row in df[(df.signal == -1) | (df.signal == 1)].sort_values(by='date').iterrows():
+            signal, date = row.get("signal"), row.get('date')
+            lst_signal_date.append((signal, date))
+            
+        if latest:
+            date = date.strftime("%d/%m/%Y") 
+            return f"Buy Signal on {date}" if lst_signal_date[-1][0] == 1 else f"Sell Signal on {date}"
+        else:
+            return lst_signal_date

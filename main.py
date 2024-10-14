@@ -37,4 +37,8 @@ if __name__ == "__main__":
     # Run ema
     dct_ema = obj_backtesting.test_strategy('ema', df, strategies, 0)
     
+    # Show Best Strategy
     print(f"SMA: S${dct_sma.get("fund")} {dct_sma.get('best')}\nEMA: S${dct_ema.get("fund")} {dct_ema.get("best")}")
+    
+    # Show Signal
+    print(obj_backtesting.show_signals(dct_ema.get('best_df'), True))
