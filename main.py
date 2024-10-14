@@ -1,10 +1,14 @@
 from src.backtesting import *
 import pandas as pd
 from yahoo_fin.stock_info import get_data
+import yaml
+
+with open("./config/config.yaml", 'r') as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
 
 if __name__ == "__main__":
     starting_fund = 100_000
-    ticker = 'D05.SI'
+    ticker = config.get("TICKER")
     start_date = '01/01/2024'
     end_date = '10/14/24'
     interval = '1d'
@@ -13,7 +17,6 @@ if __name__ == "__main__":
         (5, 10), (5, 20), (5, 50), (5, 100),
         (10, 20), (10, 50)
     ]
-
     
     # Get data
     df = get_data(ticker, 
