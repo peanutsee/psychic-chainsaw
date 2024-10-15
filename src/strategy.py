@@ -72,3 +72,5 @@ class ExponentialMovingAverage:
 
         return df_ema
     
+class BollingerBands:
+    ...
