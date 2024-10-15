@@ -48,5 +48,3 @@ if __name__ == "__main__":
     df_macd = macd.macd(df)
     fund_macd = obj_backtesting.test(df_macd)
     print(f"MACD: S${fund_macd}")
-    
-   
