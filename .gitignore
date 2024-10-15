@@ -1,4 +1,11 @@
+# Env
 pyenv
-notebooks
+.DS_Store
+
+# Cache
 __pycache__
+
+# Folders
+notebooks
+visualisations
 config
