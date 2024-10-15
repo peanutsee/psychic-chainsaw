@@ -20,7 +20,6 @@ class SimpleMovingAverage:
 
         # Create a new DataFrame with relevant columns
         df_sma = df[['adjclose', 'sma_short', 'sma_long']].copy()
-        df_sma.rename(columns={'adjclose': 'price'}, inplace=True)
 
         # Initialize 'Signal' column where 1 = Buy, -1 = Sell, 0 = Hold
         df_sma['signal'] = 0
@@ -55,7 +54,6 @@ class ExponentialMovingAverage:
 
         # Create a new DataFrame with relevant columns
         df_ema = df[['adjclose', 'ema_short', 'ema_long']].copy()
-        df_ema.rename(columns={'adjclose': 'price'}, inplace=True)
 
         # Initialize 'Signal' column where 1 = Buy, -1 = Sell, 0 = Hold
         df_ema['signal'] = 0
@@ -103,7 +101,7 @@ class MovingAverageConvergenceDivergence:
         self.signal_lag = signal_lag
         
     def macd(self, df) -> pd.DataFrame:
-        
+            
         # Calculate short-term and long-term EMAs
         df[f'{self.short_lag}-day ema'] = df['adjclose'].ewm(span=self.short_lag, adjust=False).mean()
         df[f'{self.long_lag}-day ema'] = df['adjclose'].ewm(span=self.long_lag, adjust=False).mean()
@@ -123,8 +121,8 @@ class MovingAverageConvergenceDivergence:
         # Generate signals (Buy when MACD crosses above Signal, Sell when MACD crosses below Signal)
         for i in range(1, len(df)):
             if df['macd'].iloc[i] > df['signal line'].iloc[i] and df['macd'].iloc[i-1] <= df['signal line'].iloc[i-1]:
-                df['signal'].iloc[i] = 1  # Buy signal
+                df.at[i, 'signal'] = 1  # Buy signal
             elif df['macd'].iloc[i] < df['signal line'].iloc[i] and df['macd'].iloc[i-1] >= df['signal line'].iloc[i-1]:
-                df['signal'].iloc[i] = -1  # Sell signal   
+                df.at[i, 'signal'] = -1  # Sell signal   
                      
         return df

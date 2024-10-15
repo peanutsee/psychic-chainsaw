@@ -13,7 +13,7 @@ class Backtesting:
         stock_in_hand = False
         
         for _, row in df.iterrows():
-            price, signal = row.get('price'), row.get('signal')
+            price, signal = row.get('adjclose'), row.get('signal')
             if not stock_in_hand and signal == 1:
                 stock_in_hand = True
                 n_stocks = curr_fund // price
