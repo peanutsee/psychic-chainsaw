@@ -95,12 +95,36 @@ class BollingerBands:
 
         return tmp_df
     
-    def interpret_signals(self, period: int = 30) -> None:
-        """This function interpret and indicates the actions of the bands, to prescribe a potential reaction.
+class MovingAverageConvergenceDivergence:
+    def __init__(self, short_lag: int = 12, long_lag: int = 26, signal_lag: int = 9) -> None:
+
+        self.short_lag = short_lag
+        self.long_lag = long_lag
+        self.signal_lag = signal_lag
         
-        Over a predefined period, what is the action, indication and reaction?
-        """
-        ...
-        # TODO: Decide which action to concentrate on
-        # TODO: Implement signals
+    def macd(self, df) -> pd.DataFrame:
         
+        # Calculate short-term and long-term EMAs
+        df[f'{self.short_lag}-day ema'] = df['adjclose'].ewm(span=self.short_lag, adjust=False).mean()
+        df[f'{self.long_lag}-day ema'] = df['adjclose'].ewm(span=self.long_lag, adjust=False).mean()
+        
+        # Calculate MACD line
+        df['macd'] = df[f'{self.short_lag}-day ema'] - df[f'{self.long_lag}-day ema']
+        
+        # Calculate signal line (EMA of the MACD line)
+        df['signal line'] = df['macd'].ewm(span=self.signal_lag, adjust=False).mean()
+        
+        # Calculate MACD histogram (difference between MACD and Signal line)
+        df['histogram'] = df['macd'] - df['signal line']
+        
+        # Initialize columns for buy and sell signals
+        df['signal'] = 0
+        
+        # Generate signals (Buy when MACD crosses above Signal, Sell when MACD crosses below Signal)
+        for i in range(1, len(df)):
+            if df['macd'].iloc[i] > df['signal line'].iloc[i] and df['macd'].iloc[i-1] <= df['signal line'].iloc[i-1]:
+                df['signal'].iloc[i] = 1  # Buy signal
+            elif df['macd'].iloc[i] < df['signal line'].iloc[i] and df['macd'].iloc[i-1] >= df['signal line'].iloc[i-1]:
+                df['signal'].iloc[i] = -1  # Sell signal   
+                     
+        return df
