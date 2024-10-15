@@ -73,4 +73,34 @@ class ExponentialMovingAverage:
         return df_ema
     
 class BollingerBands:
-    ...
+    def __init__(self, coefficient: int = 2) -> None:
+        self.coefficient = coefficient
+        
+    def create_bands(self, df: pd.DataFrame = None) -> pd.DataFrame:
+        
+        tmp_df = df.copy()
+        
+        # Create 20-Day SMA
+        tmp_df['20-day sma'] = tmp_df.adjclose.rolling(window=20).mean()
+
+        # Create 20-Day SD
+        tmp_df['20-day sd'] = tmp_df.adjclose.rolling(window=20).std()
+
+        # Create bands
+        tmp_df['upper_band'] = tmp_df['20-day sma'] + self.coefficient * tmp_df['20-day sd']
+        tmp_df['lower_band'] = tmp_df['20-day sma'] - self.coefficient * tmp_df['20-day sd']
+        
+        # Calculate delta
+        tmp_df['delta'] = tmp_df['upper_band'] - tmp_df['lower_band']
+
+        return tmp_df
+    
+    def interpret_signals(self, period: int = 30) -> None:
+        """This function interpret and indicates the actions of the bands, to prescribe a potential reaction.
+        
+        Over a predefined period, what is the action, indication and reaction?
+        """
+        ...
+        # TODO: Decide which action to concentrate on
+        # TODO: Implement signals
+        
