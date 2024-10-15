@@ -36,9 +36,17 @@ if __name__ == "__main__":
     
     # Run ema
     dct_ema = obj_backtesting.test_strategy('ema', df, strategies, 0)
-    
-    # Show Best Strategy
+
+     # Show Best Strategy
     print(f"SMA: S${dct_sma.get("fund")} {dct_sma.get('best')}\nEMA: S${dct_ema.get("fund")} {dct_ema.get("best")}")
     
     # Show Signal
     print(obj_backtesting.show_signals(dct_ema.get('best_df'), True))
+     
+    # Run macd
+    macd = MovingAverageConvergenceDivergence()
+    df_macd = macd.macd(df)
+    fund_macd = obj_backtesting.test(df_macd)
+    print(f"MACD: S${fund_macd}")
+    
+   
