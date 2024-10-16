@@ -3,20 +3,16 @@
 import pandas as pd
 
 class SimpleMovingAverage:
-    def __init__(self, short_lag: int = 3, long_lag: int = 5) -> None:
-        
-        self.short_lag = short_lag
-        self.long_lag = long_lag
-
-        return None
+    def __init__(self) -> None:
+        ...
         
     def __str__(self) -> str:
-        return f"SMA({self.short_lag}, {self.long_lag}) Strategy"
+        return f"SMA Strategy"
     
-    def sma(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def sma(self, df: pd.DataFrame = None, short_lag: int = 3, long_lag: int = 5) -> pd.DataFrame:
         # Create window
-        df['sma_short'] = df['adjclose'].rolling(window=self.short_lag).mean()
-        df['sma_long'] = df['adjclose'].rolling(window=self.long_lag).mean()
+        df['sma_short'] = df['adjclose'].rolling(window=short_lag).mean()
+        df['sma_long'] = df['adjclose'].rolling(window=long_lag).mean()
 
         # Create a new DataFrame with relevant columns
         df_sma = df[['adjclose', 'sma_short', 'sma_long']].copy()
@@ -37,20 +33,16 @@ class SimpleMovingAverage:
         return df_sma
     
 class ExponentialMovingAverage:
-    def __init__(self, short_lag: int = 3, long_lag: int = 5) -> None:
-        
-        self.short_lag = short_lag
-        self.long_lag = long_lag
-
-        return None
+    def __init__(self) -> None:
+        ...
 
     def __str__(self) -> str:
-        return f"EMA({self.short_lag}, {self.long_lag}) Strategy"
+        return f"EMA Strategy"
 
-    def ema(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def ema(self, df: pd.DataFrame = None, short_lag: int = 5, long_lag: int = 10) -> pd.DataFrame:
         # Create window
-        df['ema_short'] = df['adjclose'].ewm(span=self.short_lag, adjust=False).mean()
-        df['ema_long'] = df['adjclose'].ewm(span=self.long_lag, adjust=False).mean()
+        df['ema_short'] = df['adjclose'].ewm(span=short_lag, adjust=False).mean()
+        df['ema_long'] = df['adjclose'].ewm(span=long_lag, adjust=False).mean()
 
         # Create a new DataFrame with relevant columns
         df_ema = df[['adjclose', 'ema_short', 'ema_long']].copy()
@@ -71,10 +63,10 @@ class ExponentialMovingAverage:
         return df_ema
     
 class BollingerBands:
-    def __init__(self, coefficient: int = 2) -> None:
-        self.coefficient = coefficient
+    def __init__(self) -> None:
+        ...
         
-    def create_bands(self, df: pd.DataFrame = None) -> pd.DataFrame:
+    def create_bands(self, df: pd.DataFrame = None, coefficient: int = 2) -> pd.DataFrame:
         
         tmp_df = df.copy()
         
@@ -85,8 +77,8 @@ class BollingerBands:
         tmp_df['20-day sd'] = tmp_df.adjclose.rolling(window=20).std()
 
         # Create bands
-        tmp_df['upper_band'] = tmp_df['20-day sma'] + self.coefficient * tmp_df['20-day sd']
-        tmp_df['lower_band'] = tmp_df['20-day sma'] - self.coefficient * tmp_df['20-day sd']
+        tmp_df['upper_band'] = tmp_df['20-day sma'] + coefficient * tmp_df['20-day sd']
+        tmp_df['lower_band'] = tmp_df['20-day sma'] - coefficient * tmp_df['20-day sd']
         
         # Calculate delta
         tmp_df['delta'] = tmp_df['upper_band'] - tmp_df['lower_band']
@@ -94,23 +86,20 @@ class BollingerBands:
         return tmp_df
     
 class MovingAverageConvergenceDivergence:
-    def __init__(self, short_lag: int = 12, long_lag: int = 26, signal_lag: int = 9) -> None:
-
-        self.short_lag = short_lag
-        self.long_lag = long_lag
-        self.signal_lag = signal_lag
+    def __init__(self, ) -> None:
+        ...
         
-    def macd(self, df) -> pd.DataFrame:
+    def macd(self, df: pd.DataFrame, short_lag: int = 12, long_lag: int = 26, signal_lag: int = 9) -> pd.DataFrame:
             
         # Calculate short-term and long-term EMAs
-        df[f'{self.short_lag}-day ema'] = df['adjclose'].ewm(span=self.short_lag, adjust=False).mean()
-        df[f'{self.long_lag}-day ema'] = df['adjclose'].ewm(span=self.long_lag, adjust=False).mean()
+        df[f'{short_lag}-day ema'] = df['adjclose'].ewm(span=short_lag, adjust=False).mean()
+        df[f'{long_lag}-day ema'] = df['adjclose'].ewm(span=long_lag, adjust=False).mean()
         
         # Calculate MACD line
-        df['macd'] = df[f'{self.short_lag}-day ema'] - df[f'{self.long_lag}-day ema']
+        df['macd'] = df[f'{short_lag}-day ema'] - df[f'{long_lag}-day ema']
         
         # Calculate signal line (EMA of the MACD line)
-        df['signal line'] = df['macd'].ewm(span=self.signal_lag, adjust=False).mean()
+        df['signal line'] = df['macd'].ewm(span=signal_lag, adjust=False).mean()
         
         # Calculate MACD histogram (difference between MACD and Signal line)
         df['histogram'] = df['macd'] - df['signal line']

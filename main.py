@@ -1,52 +1,46 @@
 from src.backtesting import *
-import pandas as pd
-from yahoo_fin.stock_info import get_data
+from src.data import *
 import yaml
+from typing import Callable, Any
+import pandas as pd
 
 with open("./config/config.yaml", 'r') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
+    
+def run_strategy(strategy_name: str = None, 
+                 strategy_function: Callable = None, 
+                 df: pd.DataFrame = None, 
+                 obj_backtesting: Any = None, 
+                 strategies: list = None) -> None:
+    print(f"Performing {strategy_name} strategy...")
+    
+    # Test the strategy with multiple configurations
+    strat_result = obj_backtesting.test_strategy(strategy_function, df, strategies, verbose=0)
+    print(f"Best {strategy_name}: S${strat_result.get('fund')} ({strat_result.get('best')})")
+    
+    # Show the signals
+    signals = obj_backtesting.show_signals(strategy_function(df), latest=True)
+    print(f"Signals for {strategy_name} strategy: {signals}\n")
 
 if __name__ == "__main__":
-    starting_fund = 100_000
+    starting_fund = config.get("FUND")
     ticker = config.get("TICKER")
-    start_date = '01/01/2024'
-    end_date = '10/14/24'
-    interval = '1d'
-    strategies = [
-        (3, 5), (3, 10), (3, 20), (3, 50),
-        (5, 10), (5, 20), (5, 50), (5, 100),
-        (10, 20), (10, 50)
-    ]
-    
-    # Get data
-    df = get_data(ticker, 
-                  start_date=start_date, 
-                  end_date=end_date, 
-                  index_as_date = False, 
-                  interval=interval)
-    
-    df['date'] = pd.to_datetime(df['date'])
-    df.drop(columns='ticker', inplace=True)
+    start_date = config.get("START_DATE")
+    end_date = config.get("END_DATE")
+    interval = config.get("INTERVAL")
+    strategies = config.get("STRATEGIES")
     
     # Initialize objects
+    obj_ticker_data = TickerData(ticker, start_date, end_date, interval)
     obj_backtesting = Backtesting(starting_fund)
+    obj_sma = SimpleMovingAverage()
+    obj_ema = ExponentialMovingAverage()
+    obj_macd = MovingAverageConvergenceDivergence()
     
-    # Run sma
-    dct_sma = obj_backtesting.test_strategy('sma', df, strategies, 0)
+    # Get data
+    df = obj_ticker_data.get_data()
     
-    # Run ema
-    dct_ema = obj_backtesting.test_strategy('ema', df, strategies, 0)
-
-     # Show Best Strategy
-    print(f"SMA: S${dct_sma.get("fund")} {dct_sma.get('best')}\nEMA: S${dct_ema.get("fund")} {dct_ema.get("best")}")
-    
-    # Show Signal
-    print(obj_backtesting.show_signals(dct_ema.get('best_df'), True))
-     
-    # Run macd
-    macd = MovingAverageConvergenceDivergence()
-    df_macd = macd.macd(df)
-    fund_macd = obj_backtesting.test(df_macd)
-    print(f"MACD: S${fund_macd}")
-    
-   
+    # Perform Strategies
+    run_strategy("SMA", obj_sma.sma, df, obj_backtesting, strategies)
+    run_strategy("EMA", obj_ema.ema, df, obj_backtesting, strategies)
+    run_strategy("MACD", obj_macd.macd, df, obj_backtesting, strategies)
