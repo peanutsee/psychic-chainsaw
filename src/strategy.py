@@ -108,6 +108,7 @@ class MovingAverageConvergenceDivergence:
         df['signal'] = 0
         
         # Generate signals (Buy when MACD crosses above Signal, Sell when MACD crosses below Signal)
+        # TODO: Crossover Strategy indicates buy/sell signal, but crossover between MACD and zeroline signals bullish/bearish
         for i in range(1, len(df)):
             if df['macd'].iloc[i] > df['signal line'].iloc[i] and df['macd'].iloc[i-1] <= df['signal line'].iloc[i-1]:
                 df.at[i, 'signal'] = 1  # Buy signal
