@@ -1,6 +1,7 @@
 """This is a python script for the backtesting class."""
 import pandas as pd
 from .strategy import *
+from typing import Callable
 
 class Backtesting:
     def __init__(self, fund: float = 10_000) -> None:
@@ -27,26 +28,16 @@ class Backtesting:
             curr_fund += n_stocks * price
         
         return round(curr_fund, 2)
-            
-    def _apply_strategy(self, strategy: str = 'sma', df: pd.DataFrame = None, window: list = [3, 4]) -> pd.DataFrame:
-        
-        short_window, long_window = window
-
-        if strategy == 'sma':
-            return SimpleMovingAverage(short_window, long_window).sma(df)
-        if strategy == 'ema':
-            return ExponentialMovingAverage(short_window, long_window).ema(df) 
-        else:
-            raise ValueError(f"Strategy {strategy} not supported.")
    
-    def test_strategy(self, strategy: str = 'sma', df: pd.DataFrame = None, windows: list = [(3, 5), (5, 10)], verbose: int = 1) -> dict:
+    def test_strategy(self, strategy_func: Callable = None, df: pd.DataFrame = None, windows: list = [(3, 5), (5, 10)], verbose: int = 1) -> dict:
         
         best_window = None
         prev_final = None
         best_df = None
+        
         for window in windows:
             short_window, long_window = window
-            tmp_df = self._apply_strategy(strategy, df, window)
+            tmp_df = strategy_func(df, short_window, long_window)
             final_fund = self.test(tmp_df)
             
             if verbose:
