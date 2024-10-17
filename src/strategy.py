@@ -90,7 +90,6 @@ class MovingAverageConvergenceDivergence:
         ...
         
     def macd(self, df: pd.DataFrame, short_lag: int = 12, long_lag: int = 26, signal_lag: int = 9) -> pd.DataFrame:
-            
         # Calculate short-term and long-term EMAs
         df[f'{short_lag}-day ema'] = df['adjclose'].ewm(span=short_lag, adjust=False).mean()
         df[f'{long_lag}-day ema'] = df['adjclose'].ewm(span=long_lag, adjust=False).mean()
@@ -104,18 +103,20 @@ class MovingAverageConvergenceDivergence:
         # Calculate MACD histogram (difference between MACD and Signal line)
         df['histogram'] = df['macd'] - df['signal line']
         
-        # Initialize columns for buy and sell signals
+        # Initialize signal and conditions columns
         df['signal'] = 0
+        df['conditions'] = ''
         
-        # Generate signals (Buy when MACD crosses above Signal, Sell when MACD crosses below Signal)
-        # TODO: Crossover Strategy indicates buy/sell signal, but crossover between MACD and zeroline signals bullish/bearish
-        for i in range(1, len(df)):
-            if df['macd'].iloc[i] > df['signal line'].iloc[i] and df['macd'].iloc[i-1] <= df['signal line'].iloc[i-1]:
-                df.at[i, 'signal'] = 1  # Buy signal
-            elif df['macd'].iloc[i] < df['signal line'].iloc[i] and df['macd'].iloc[i-1] >= df['signal line'].iloc[i-1]:
-                df.at[i, 'signal'] = -1  # Sell signal   
-                     
+        # Generate signals (Buy/Sell) based on MACD and Signal line crossover
+        df.loc[(df['macd'] > df['signal line']) & (df['macd'].shift(1) <= df['signal line'].shift(1)), 'signal'] = 1 
+        df.loc[(df['macd'] < df['signal line']) & (df['macd'].shift(1) >= df['signal line'].shift(1)), 'signal'] = -1 
+        
+        # Generate conditions (Bull/Bear) based on zero-line crossover
+        df.loc[(df['macd'] > 0) & (df['macd'].shift(1) <= 0), 'conditions'] = 'bull'  
+        df.loc[(df['macd'] < 0) & (df['macd'].shift(1) >= 0), 'conditions'] = 'bear' 
+        
         return df
+
     
 class RelativeStrengthIndex:
     def __init__(self) -> None:
