@@ -59,25 +59,49 @@ class Backtesting:
             "best_df": best_df
         }
     
-    def show_signals(self, df: pd.DataFrame, latest: bool = False) -> type[list, tuple]:
-        lst_signal_date = []
-
-        for _, row in df[(df.signal == -1) | (df.signal == 1)].sort_values(by='date').iterrows():
-            signal, date = row.get("signal"), row.get('date')
-            lst_signal_date.append((signal, date))
-            
-        if latest:
-            date = date.strftime("%d/%m/%Y") 
-            return f"Buy Signal on {date}" if lst_signal_date[-1][0] == 1 else f"Sell Signal on {date}"
+    def show_signals(self, df: pd.DataFrame, latest: bool = False, is_oscillator: bool = False) -> type[list, tuple]:
+        if not is_oscillator:
+            lst_signal_date = []
+            for _, row in df[(df.signal == -1) | (df.signal == 1)].sort_values(by='date').iterrows():
+                signal, date = row.get("signal"), row.get('date')
+                lst_signal_date.append((signal, date))
+                
+            if latest:
+                date = date.strftime("%d/%m/%Y") 
+                return f"Buy Signal on {date}" if lst_signal_date[-1][0] == 1 else f"Sell Signal on {date}"
+            else:
+                return lst_signal_date
         else:
-            return lst_signal_date
-        
-class BacktestingOscillator:
-    def __init__(self):
-        ...
-    
-    def test(self):
-        ...
-    
-    def show_signals(self):
-        ...
+            tmp_lst_signals = []
+            
+            # Gather signals
+            for _, row in df.iterrows():
+                if row.get("overbought"):
+                    tmp_lst_signals.append(("overbought", row.get('date')))
+                if row.get("oversold"):
+                    tmp_lst_signals.append(("oversold", row.get('date')))
+
+            lst_signals = []
+            i = 0
+
+            # Loop through the signals list
+            while i < len(tmp_lst_signals):
+                signal = tmp_lst_signals[i]
+                current_flag = signal[0]
+                start_date = signal[1].strftime("%d/%m/%Y") 
+                
+                # Look ahead for the next signal with a different flag
+                i += 1
+                while i < len(tmp_lst_signals) and tmp_lst_signals[i][0] == current_flag:
+                    i += 1
+                
+                # If there is a valid next signal with a different flag
+                if i < len(tmp_lst_signals):
+                    end_date = tmp_lst_signals[i][1].strftime("%d/%m/%Y") 
+                    lst_signals.append((current_flag, start_date, end_date))
+                
+            if latest:
+                return lst_signals[-1]
+            else:
+                return lst_signals
+            

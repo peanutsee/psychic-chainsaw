@@ -12,7 +12,6 @@ def run_strategy(strategy_name: str = None,
                  df: pd.DataFrame = None, 
                  obj_backtesting: Any = None, 
                  strategies: list = None) -> None:
-    print(f"Performing {strategy_name} strategy...")
     
     # Test the strategy with multiple configurations
     strat_result = obj_backtesting.test_strategy(strategy_function, df, strategies, verbose=0)
@@ -46,3 +45,6 @@ if __name__ == "__main__":
     run_strategy("EMA", obj_ema.ema, df, obj_backtesting, strategies)
     run_strategy("MACD", obj_macd.macd, df, obj_backtesting, strategies)
     
+    # Run RSI
+    rsi_signal = obj_backtesting.show_signals(obj_rsi.rsi(df), is_oscillator = True, latest=True)
+    print(f"RSI Signal {rsi_signal[0].title()} between {rsi_signal[1]} and {rsi_signal[2]}")
