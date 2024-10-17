@@ -7,7 +7,7 @@ class SimpleMovingAverage:
         ...
         
     def __str__(self) -> str:
-        return f"SMA Strategy"
+        return "SMA Strategy"
     
     def sma(self, df: pd.DataFrame = None, short_lag: int = 3, long_lag: int = 5) -> pd.DataFrame:
         # Create window
@@ -37,7 +37,7 @@ class ExponentialMovingAverage:
         ...
 
     def __str__(self) -> str:
-        return f"EMA Strategy"
+        return "EMA Strategy"
 
     def ema(self, df: pd.DataFrame = None, short_lag: int = 5, long_lag: int = 10) -> pd.DataFrame:
         # Create window
@@ -115,4 +115,41 @@ class MovingAverageConvergenceDivergence:
             elif df['macd'].iloc[i] < df['signal line'].iloc[i] and df['macd'].iloc[i-1] >= df['signal line'].iloc[i-1]:
                 df.at[i, 'signal'] = -1  # Sell signal   
                      
+        return df
+    
+class RelativeStrengthIndex:
+    def __init__(self) -> None:
+        ...
+        
+    def __str__(self) -> str:
+        return "RSI Oscillator"
+    
+    def rsi(self, df: pd.DataFrame, look_back_period: int = 14, upper_band: int = 70, lower_band: int = 30) -> pd.DataFrame:
+        df = df.copy()  # Avoid modifying the original DataFrame
+        
+        # Calculate price changes
+        df['delta'] = df['adjclose'].diff()
+        
+        # Calculate gains and losses
+        df['gain'] = df['delta'].clip(lower=0)  # Gains: positive differences only
+        df['loss'] = -df['delta'].clip(upper=0)  # Losses: negative differences only
+        
+        # Calculate rolling averages for the first look-back period
+        avg_gain = df['gain'].rolling(window=look_back_period, min_periods=look_back_period).mean()
+        avg_loss = df['loss'].rolling(window=look_back_period, min_periods=look_back_period).mean()
+        
+        # Calculate exponential moving averages (EMA) for gains and losses
+        df['avg_gain'] = avg_gain.combine_first(df['gain'].ewm(span=look_back_period, adjust=False).mean())
+        df['avg_loss'] = avg_loss.combine_first(df['loss'].ewm(span=look_back_period, adjust=False).mean())
+        
+        # Calculate relative strength (RS)
+        df['RS'] = df['avg_gain'] / df['avg_loss']
+        
+        # Calculate the RSI
+        df['RSI'] = 100 - (100 / (1 + df['RS']))
+        
+        # Add overbought and oversold columns
+        df['overbought'] = df['RSI'] > upper_band
+        df['oversold'] = df['RSI'] < lower_band
+        
         return df

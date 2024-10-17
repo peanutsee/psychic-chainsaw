@@ -71,3 +71,13 @@ class Backtesting:
             return f"Buy Signal on {date}" if lst_signal_date[-1][0] == 1 else f"Sell Signal on {date}"
         else:
             return lst_signal_date
+        
+class BacktestingOscillator:
+    def __init__(self):
+        ...
+    
+    def test(self):
+        ...
+    
+    def show_signals(self):
+        ...
