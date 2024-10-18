@@ -4,8 +4,8 @@ import pandas as pd
 
 class SimpleMovingAverage:
     def __init__(self) -> None:
-        ...
-        
+        pass
+    
     def __str__(self) -> str:
         return "SMA Strategy"
     
@@ -23,13 +23,10 @@ class SimpleMovingAverage:
         # Add Date Column
         df_sma['date'] = df['date']
 
-        # Iterate through the DataFrame to create buy/sell signals
-        for i in range(1, len(df_sma)):
-            if df_sma['sma_short'][i] > df_sma['sma_long'][i] and df_sma['sma_short'][i-1] <= df_sma['sma_long'][i-1]:
-                df_sma.at[i, 'signal'] = 1  # Buy signal
-            elif df_sma['sma_short'][i] < df_sma['sma_long'][i] and df_sma['sma_short'][i-1] >= df_sma['sma_long'][i-1]:
-                df_sma.at[i, 'signal'] = -1  # Sell signal
-
+        # Generate signals (Buy/Sell) based on short-lag and long-lag crossover 
+        df_sma.loc[(df_sma['sma_short'] > df_sma['sma_long']) & (df_sma['sma_short'].shift(1) <= df_sma['sma_long'].shift(1)), 'signal'] = 1 
+        df_sma.loc[(df_sma['sma_short'] < df_sma['sma_long']) & (df_sma['sma_short'].shift(1) >= df_sma['sma_long'].shift(1)), 'signal'] = -1
+        
         return df_sma
     
 class ExponentialMovingAverage:
@@ -54,11 +51,8 @@ class ExponentialMovingAverage:
         df_ema['date'] = df['date']
 
         # Iterate through the DataFrame to create buy/sell signals
-        for i in range(1, len(df_ema)):
-            if df_ema['ema_short'][i] > df_ema['ema_long'][i] and df_ema['ema_short'][i-1] <= df_ema['ema_long'][i-1]:
-                df_ema.at[i, 'signal'] = 1  # Buy signal
-            elif df_ema['ema_short'][i] < df_ema['ema_long'][i] and df_ema['ema_short'][i-1] >= df_ema['ema_long'][i-1]:
-                df_ema.at[i, 'signal'] = -1  # Sell signal
+        df_ema.loc[(df_ema['ema_short'] > df_ema['ema_long']) & (df_ema['ema_short'].shift(1) <= df_ema['ema_long'].shift(1)), 'signal'] = 1 
+        df_ema.loc[(df_ema['ema_short'] < df_ema['ema_long']) & (df_ema['ema_short'].shift(1) >= df_ema['ema_long'].shift(1)), 'signal'] = -1
 
         return df_ema
     
@@ -117,7 +111,6 @@ class MovingAverageConvergenceDivergence:
         
         return df
 
-    
 class RelativeStrengthIndex:
     def __init__(self) -> None:
         ...
@@ -152,5 +145,5 @@ class RelativeStrengthIndex:
         # Add overbought and oversold columns
         df['overbought'] = df['RSI'] > upper_band
         df['oversold'] = df['RSI'] < lower_band
-        
+       
         return df
