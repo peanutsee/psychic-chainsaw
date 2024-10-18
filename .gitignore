@@ -12,3 +12,4 @@ config
 
 # Files
 notes.txt
+*.csv
