@@ -1,5 +1,6 @@
 from src.backtesting import *
 from src.data import *
+from src.strategy import *
 import yaml
 from typing import Callable, Any
 import pandas as pd
