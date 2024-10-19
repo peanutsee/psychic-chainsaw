@@ -3,6 +3,19 @@
 import pandas as pd
 
 class SimpleMovingAverage:
+    """Simple Moving Average (SMA) Crossover Strategy.
+    
+    What:
+    SMA Crossover Strategy uses two simple moving averages: a short-lag SMA and a long-lag SMA.
+    The SMA calculates the average price over a defined period, with equal weight given to each data point.
+    
+    How:
+    Buy Signal: Short-lag SMA crosses over Long-lag SMA (Bullish Crossover).
+    Sell Signal: Long-lag SMA crosses over Short-lag SMA (Bearish Crossover).
+    
+    Typically, the short-lag SMA might be a 50-day moving average, while the long-lag SMA could be a 200-day moving average for medium- or long-term trend analysis.
+    """
+    
     def __init__(self) -> None:
         pass
     
@@ -10,6 +23,28 @@ class SimpleMovingAverage:
         return "SMA Strategy"
     
     def sma(self, df: pd.DataFrame = None, short_lag: int = 3, long_lag: int = 5) -> pd.DataFrame:
+        """SMA Crossover Strategy implementation.
+        
+        1. Create the short-lag and long-lag SMAs using pandas' .rolling() and .mean().
+        2. Determine the buy/sell signals by checking when the short-lag SMA crosses the long-lag SMA, and vice versa.
+        
+        Parameters
+        ----------
+        df: pd.DataFrame
+            This defines the ticker data in a pandas DataFrame.
+            
+        short_lag: int
+            This defines the look-back period for the short-lag SMA (default is 50).
+            
+        long_lag: int
+            This defines the look-back period for the long-lag SMA (default is 200).
+            
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame that contains the original price data along with the short-lag SMA, long-lag SMA, and buy/sell signals.
+        """
+        
         # Create window
         df['sma_short'] = df['adjclose'].rolling(window=short_lag).mean()
         df['sma_long'] = df['adjclose'].rolling(window=long_lag).mean()
@@ -30,6 +65,21 @@ class SimpleMovingAverage:
         return df_sma
     
 class ExponentialMovingAverage:
+    """Exponential Moving Average (EMA) Crossover Strategy.
+    
+    What:
+    EMA Crossover Strategy uses two moving averages: a short-lag EMA and a long-lag EMA.
+    The EMA places more weight on recent data compared to the Simple Moving Average (SMA),
+    making it more responsive to price changes.
+    
+    How:
+    Buy Signal: Short-lag EMA crosses over Long-lag EMA.
+    Sell Signal: Long-lag EMA crosses over Short-lag EMA.
+    
+    Typically, the look-back periods for this strategy can vary depending on the type of trading.
+    Short-term periods like 5-day and 10-day EMAs are often used for intraday or swing trading.
+    """
+    
     def __init__(self) -> None:
         ...
 
@@ -37,6 +87,28 @@ class ExponentialMovingAverage:
         return "EMA Strategy"
 
     def ema(self, df: pd.DataFrame = None, short_lag: int = 5, long_lag: int = 10) -> pd.DataFrame:
+        """EMA Crossover Strategy implementation.
+        
+        1. Create the short-lag and long-lag EMAs using pandas' .ewm() and .mean().
+        2. Determine the buy/sell signals by checking when the short-lag EMA crosses the long-lag EMA, and vice versa.
+        
+        Parameters
+        ----------
+        df: pd.DataFrame
+            This defines the ticker data in a pandas DataFrame.
+            
+        short_lag: int
+            This defines the look-back period for the short-lag EMA.
+            
+        long_lag: int
+            This defines the look-back period for the long-lag EMA.
+            
+        Returns
+        -------
+        pd.DataFrame
+            This DataFrame contains the ticker data with EMAs and signals.
+        """
+        
         # Create window
         df['ema_short'] = df['adjclose'].ewm(span=short_lag, adjust=False).mean()
         df['ema_long'] = df['adjclose'].ewm(span=long_lag, adjust=False).mean()
@@ -57,18 +129,50 @@ class ExponentialMovingAverage:
         return df_ema
     
 class BollingerBands:
+    """Bollinger Bands Strategy.
+    
+    What:
+    Bollinger Bands are a volatility-based indicator created by plotting a Simple Moving Average (SMA)
+    with upper and lower bands. These bands are typically set two standard deviations above and below
+    the SMA, creating a volatility channel.
+    
+    How:
+    Overbought Condition: Price approaches or exceeds the upper band.
+    Oversold Condition: Price approaches or falls below the lower band.
+    
+    Traders often use Bollinger Bands to identify periods of high volatility and potential price reversals.
+    """
+    
     def __init__(self) -> None:
         ...
         
-    def create_bands(self, df: pd.DataFrame = None, coefficient: int = 2) -> pd.DataFrame:
+    def bollinger_bands(self, df: pd.DataFrame = None, coefficient: int = 2) -> pd.DataFrame:
+        """Create Bollinger Bands.
+        
+        1. Calculate the 20-day SMA and standard deviation.
+        2. Use the SMA and standard deviation to calculate the upper and lower Bollinger Bands.
+        
+        Parameters
+        ----------
+        df: pd.DataFrame
+            The DataFrame that contains the price data.
+            
+        coefficient: int
+            The multiplier for the standard deviation, typically 2, used to create the bands.
+            
+        Returns
+        -------
+        pd.DataFrame
+            This DataFrame contains the price data along with the SMA, upper band, lower band, and delta.
+        """
         
         tmp_df = df.copy()
         
         # Create 20-Day SMA
-        tmp_df['20-day sma'] = tmp_df.adjclose.rolling(window=20).mean()
+        tmp_df['20-day sma'] = tmp_df.price.rolling(window=20).mean()
 
         # Create 20-Day SD
-        tmp_df['20-day sd'] = tmp_df.adjclose.rolling(window=20).std()
+        tmp_df['20-day sd'] = tmp_df.price.rolling(window=20).std()
 
         # Create bands
         tmp_df['upper_band'] = tmp_df['20-day sma'] + coefficient * tmp_df['20-day sd']
@@ -80,10 +184,50 @@ class BollingerBands:
         return tmp_df
     
 class MovingAverageConvergenceDivergence:
+    """Moving Average Convergence Divergence (MACD) Strategy.
+    
+    What:
+    MACD is a trend-following momentum indicator that shows the relationship between two
+    exponential moving averages (EMAs) of a security's price: a short-term EMA and a long-term EMA.
+    
+    How:
+    Buy Signal: MACD line crosses above the Signal line (Bullish Crossover).
+    Sell Signal: MACD line crosses below the Signal line (Bearish Crossover).
+    
+    MACD Histogram can be used to measure the strength of the trend, while MACD crossovers are used
+    to generate buy/sell signals.
+    """
+    
     def __init__(self, ) -> None:
         ...
         
     def macd(self, df: pd.DataFrame, short_lag: int = 12, long_lag: int = 26, signal_lag: int = 9) -> pd.DataFrame:
+        """MACD Crossover Strategy.
+        
+        1. Calculate short-term and long-term EMAs.
+        2. Generate MACD line, Signal line, and MACD histogram.
+        3. Determine buy/sell signals based on the MACD and Signal line crossovers.
+        
+        Parameters
+        ----------
+        df: pd.DataFrame
+            The DataFrame containing ticker price data.
+        
+        short_lag: int
+            The short-term EMA period (typically 12 days).
+            
+        long_lag: int
+            The long-term EMA period (typically 26 days).
+            
+        signal_lag: int
+            The period for calculating the Signal line (typically 9 days).
+        
+        Returns
+        -------
+        pd.DataFrame
+            The DataFrame with MACD line, Signal line, histogram, and signals.
+        """
+        
         # Calculate short-term and long-term EMAs
         df[f'{short_lag}-day ema'] = df['adjclose'].ewm(span=short_lag, adjust=False).mean()
         df[f'{long_lag}-day ema'] = df['adjclose'].ewm(span=long_lag, adjust=False).mean()
@@ -112,6 +256,19 @@ class MovingAverageConvergenceDivergence:
         return df
 
 class RelativeStrengthIndex:
+    """Relative Strength Index (RSI) Oscillator Strategy.
+    
+    What:
+    RSI is a momentum oscillator that measures the speed and change of price movements. It ranges
+    from 0 to 100 and is used to identify overbought or oversold conditions.
+    
+    How:
+    Buy Signal: RSI crosses below the lower band (typically 30), indicating oversold conditions.
+    Sell Signal: RSI crosses above the upper band (typically 70), indicating overbought conditions.
+    
+    RSI can also be used to detect divergences between price and momentum to anticipate potential reversals.
+    """
+    
     def __init__(self) -> None:
         ...
         
@@ -119,7 +276,34 @@ class RelativeStrengthIndex:
         return "RSI Oscillator"
     
     def rsi(self, df: pd.DataFrame, look_back_period: int = 14, upper_band: int = 70, lower_band: int = 30) -> pd.DataFrame:
-        df = df.copy()  # Avoid modifying the original DataFrame
+        """RSI Oscillator Calculation.
+        
+        1. Calculate price changes and determine gains and losses.
+        2. Compute the rolling averages or EMAs of the gains and losses.
+        3. Calculate the Relative Strength (RS) and RSI based on the gains/losses.
+        4. Identify overbought or oversold conditions using predefined bands.
+        
+        Parameters
+        ----------
+        df: pd.DataFrame
+            The DataFrame containing the price data.
+            
+        look_back_period: int
+            The look-back period for RSI calculation (typically 14).
+            
+        upper_band: int
+            The upper band threshold (typically 70) to indicate overbought conditions.
+            
+        lower_band: int
+            The lower band threshold (typically 30) to indicate oversold conditions.
+        
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame with the price data, RSI values, and signals for overbought/oversold conditions.
+        """
+        
+        df = df.copy() 
         
         # Calculate price changes
         df['delta'] = df['adjclose'].diff()
