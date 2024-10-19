@@ -24,7 +24,7 @@ class Backtesting:
 
         Parameters
         ----------
-        fund : float, optional
+        fund : float
             The initial amount of capital available for trading (default is 10,000).
         """
         self.fund = fund
@@ -36,7 +36,7 @@ class Backtesting:
 
         Parameters
         ----------
-        df : pd.DataFrame, optional
+        df : pd.DataFrame
             A DataFrame containing stock data with columns 'adjclose' and 'signal'. 
             The 'signal' column should have values of 1 (buy) and -1 (sell).
 
@@ -77,9 +77,9 @@ class Backtesting:
             A function that implements the trading strategy and takes the DataFrame and window parameters.
         df : pd.DataFrame
             A DataFrame containing stock data needed for strategy execution.
-        windows : List[Tuple[int, int]], optional
+        windows : List[Tuple[int, int]]
             A list of tuples representing different (short_window, long_window) combinations to test (default is [(3, 5), (5, 10)]).
-        verbose : int, optional
+        verbose : int
             If set to 1, the method will print details of each test (default is 1).
 
         Returns
@@ -128,9 +128,9 @@ class Backtesting:
         df : pd.DataFrame
             A DataFrame containing stock data with a 'signal' column for buy/sell signals 
             and optional 'overbought'/'oversold' indicators for oscillator signals.
-        latest : bool, optional
+        latest : bool
             If True, returns only the most recent signal (default is False).
-        is_oscillator : bool, optional
+        is_oscillator : bool
             If True, indicates that the method should look for oscillator signals 
             (default is False).
 

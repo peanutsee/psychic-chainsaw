@@ -29,13 +29,13 @@ class TickerData:
 
         Parameters
         ----------
-        ticker : str, optional
+        ticker : str
             The stock ticker symbol for the desired stock (default is None).
-        start_date : str, optional
+        start_date : str
             The start date for the historical data retrieval in 'YYYY-MM-DD' format (default is None).
-        end_date : str, optional
+        end_date : str
             The end date for the historical data retrieval in 'YYYY-MM-DD' format (default is None).
-        interval : str, optional
+        interval : str
             The frequency of the data retrieval (default is '1d'). 
             Options include '1d', '1wk', '1mo', etc.
         """
