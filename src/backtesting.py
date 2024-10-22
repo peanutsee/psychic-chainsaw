@@ -1,6 +1,10 @@
 import pandas as pd
 from typing import Callable, List, Dict, Tuple
+import yaml
 
+with open("./config/config.yaml", 'r') as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
+    
 class Backtesting:
     """Class for performing backtesting on trading strategies.
 
@@ -146,9 +150,9 @@ class Backtesting:
             for _, row in df[(df.signal == -1) | (df.signal == 1)].sort_values(by='date').iterrows():
                 signal, date = row.get("signal"), row.get('date')
                 lst_signal_date.append((signal, date))
-                
-            if latest:
-                date = date.strftime("%d/%m/%Y") 
+                                
+            if latest and lst_signal_date:
+                date = date.strftime(config['PATTERN']) 
                 return f"Buy Signal on {date}" if lst_signal_date[-1][0] == 1 else f"Sell Signal on {date}"
             else:
                 return lst_signal_date
@@ -164,12 +168,12 @@ class Backtesting:
 
             lst_signals = []
             i = 0
-
+            
             # Loop through the signals list
             while i < len(tmp_lst_signals):
                 signal = tmp_lst_signals[i]
                 current_flag = signal[0]
-                start_date = signal[1].strftime("%d/%m/%Y") 
+                start_date = signal[1].strftime(config['PATTERN']) 
                 
                 # Look ahead for the next signal with a different flag
                 i += 1
@@ -178,10 +182,10 @@ class Backtesting:
                 
                 # If there is a valid next signal with a different flag
                 if i < len(tmp_lst_signals):
-                    end_date = tmp_lst_signals[i][1].strftime("%d/%m/%Y") 
+                    end_date = tmp_lst_signals[i][1].strftime(config['PATTERN']) 
                     lst_signals.append((current_flag, start_date, end_date))
                 
             if latest:
-                return lst_signals[-1]
+                return lst_signals[-1] if lst_signals else ["NO DATA", 'NO DATA', 'NO DATA']
             else:
                 return lst_signals

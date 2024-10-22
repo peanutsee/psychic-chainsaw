@@ -37,6 +37,7 @@ if __name__ == "__main__":
     obj_ema = ExponentialMovingAverage()
     obj_macd = MovingAverageConvergenceDivergence()
     obj_rsi = RelativeStrengthIndex()
+    obj_msi = MoneyFlowIndex()
     
     # Get data
     df = obj_ticker_data.get_data()
@@ -49,3 +50,7 @@ if __name__ == "__main__":
     # Run RSI
     rsi_signal = obj_backtesting.show_signals(obj_rsi.rsi(df), is_oscillator = True, latest=True)
     print(f"RSI Signal {rsi_signal[0].title()} between {rsi_signal[1]} and {rsi_signal[2]}")
+    
+    # Run MSI
+    msi_signal = obj_backtesting.show_signals(obj_msi.msi(df), is_oscillator = True, latest=True)
+    print(f"MSI Signal {msi_signal[0].title()} between {msi_signal[1]} and {msi_signal[2]}")

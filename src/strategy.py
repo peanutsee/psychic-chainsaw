@@ -331,3 +331,86 @@ class RelativeStrengthIndex:
         df['oversold'] = df['RSI'] < lower_band
        
         return df
+
+class MoneyFlowIndex:
+    """Money Flow Index (MSI) Oscillator Strategy.
+    
+    What:
+    MFI is a technical oscillator that uses price and volume to identify overbought or oversold signals in assets. It can be used to spot
+    divergences which warns of a trend change in price. The oscillator moves between 0 and 100.
+    Divergences is defined as opposite trends in MFI and securities price.
+    
+    How:
+    MFI above 80 = overbought conditions, may signal a price reversal. Threshold of 90 is also used.
+    MFI below 20 = oversold conditions, may signal a price breakout. Threshold of 10 is also used.
+    """
+    
+    def __init__(self) -> None:
+        pass
+    
+    def __str__(self) -> str:
+        return "MFI Oscillator"
+    
+    def msi(self, df: pd.DataFrame, look_back_period: int = 14, upper_band: int = 80, lower_band: int = 20) -> pd.DataFrame:
+        """Calculate the Money Flow Index (MFI) Calculation.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame containing at least the following columns: 'high', 'low', 'close', and 'volume'.
+        look_back_period : int, optional
+            The number of periods over which to calculate the MFI (default is 14).
+        upper_band : int, optional
+            The threshold for determining an overbought condition (default is 80).
+        lower_band : int, optional
+            The threshold for determining an oversold condition (default is 20).
+
+        Returns
+        -------
+        pd.DataFrame
+            The input DataFrame with added columns for 'MFI', 'overbought', and 'oversold' signals.
+        
+        Notes
+        -----
+        The Money Flow Index (MFI) is a momentum indicator that uses both price and volume data
+        to measure buying and selling pressure. The formula used for the calculation is:
+
+            MFI = 100 - (100 / (1 + Money Flow Ratio))
+
+        where the Money Flow Ratio is the ratio of positive to negative money flows over the 
+        look-back period.
+        """
+
+        # Calculate typical price
+        df['typical_price'] = (df['high'] + df['low'] + df['close']) / 3
+        
+        # Calculate raw money flow
+        df['raw_money_flow'] = df['typical_price'] * df['volume']
+        
+        # Mark periods as up or down by using 1 or -1
+        df['money_flow_sign'] = df['typical_price'].diff().apply(lambda x: 1 if x > 0 else -1)
+        
+        # Apply the sign to raw money flow to get positive and negative money flow
+        df['signed_money_flow'] = df['raw_money_flow'] * df['money_flow_sign']
+        
+        # Separate positive and negative money flows
+        df['positive_flow'] = df['signed_money_flow'].apply(lambda x: x if x > 0 else 0)
+        df['negative_flow'] = df['signed_money_flow'].apply(lambda x: -x if x < 0 else 0)
+        
+        # Calculate the sum of positive and negative money flows over the look-back period
+        df['sum_positive_flow'] = df['positive_flow'].rolling(window=look_back_period).sum()
+        df['sum_negative_flow'] = df['negative_flow'].rolling(window=look_back_period).sum()
+        
+        # Calculate the money flow ratio
+        df['money_flow_ratio'] = df['sum_positive_flow'] / df['sum_negative_flow']
+        
+        # Calculate the Money Flow Index (MFI)
+        df['MFI'] = 100 - (100 / (1 + df['money_flow_ratio']))
+        
+        # Add signals for overbought or oversold
+        df['overbought'] = df['MFI'] > upper_band
+        df['oversold'] = df['MFI'] < lower_band
+        
+        return df
+        
+        
