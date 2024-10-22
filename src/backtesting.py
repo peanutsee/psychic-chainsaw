@@ -182,6 +182,6 @@ class Backtesting:
                     lst_signals.append((current_flag, start_date, end_date))
                 
             if latest:
-                return lst_signals[-1]
+                return lst_signals[-1] if lst_signals else ["NO DATA", 'NO DATA', 'NO DATA']
             else:
                 return lst_signals
