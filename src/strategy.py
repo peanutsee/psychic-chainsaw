@@ -469,6 +469,5 @@ class StochasticOscillator:
         
         return df
         
-        
-        
-        
+class RateOfChange:
+    # TODO: Implement this class
