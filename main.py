@@ -38,6 +38,7 @@ if __name__ == "__main__":
     obj_macd = MovingAverageConvergenceDivergence()
     obj_rsi = RelativeStrengthIndex()
     obj_msi = MoneyFlowIndex()
+    obj_so = StochasticOscillator()
     
     # Get data
     df = obj_ticker_data.get_data()
@@ -54,3 +55,7 @@ if __name__ == "__main__":
     # Run MSI
     msi_signal = obj_backtesting.show_signals(obj_msi.msi(df), is_oscillator = True, latest=True)
     print(f"MSI Signal {msi_signal[0].title()} between {msi_signal[1]} and {msi_signal[2]}")
+    
+    # Run SO
+    so_signal = obj_backtesting.show_signals(obj_so.so(df), is_oscillator = True, latest=True)
+    print(f"SO Signal {so_signal[0].title()} between {so_signal[1]} and {so_signal[2]}")
