@@ -469,6 +469,60 @@ class StochasticOscillator:
         
         return df
         
+class RateOfChange:
+    """Rate of Change (ROC) Indicator.
+    
+    What:
+    ROC is a momentum-based technical indicator that measures the percentage change in price between the current price and the price a certain number 
+    of periods ago. ROC is plotted against zero. It can be used to spot divergences, overbought and oversold conditions, and centerline crossovers. 
+    Mainly used to indicate an indicative change in price.
+    
+    How:
+    Indicator moving upwards into positive = upside
+    Indicator moving downwards into negative = downside
+    Indicator hovering near zero = consolidation
+    """
+    
+    def __init__(self) -> None:
+        pass
+    
+    def __str__(self) -> str:
+        return "Rate Of Change Indicator"
+    
+    def roc(self, df:pd.DataFrame, n: int = 9) -> pd.DataFrame:
+        """ROC Calculation.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            DataFrame containing at least the following column: 'close'.
+            
+        n: int
+            Defines the lookback period. 
+
+        Returns
+        -------
+        pd.DataFrame
+            The input DataFrame with added columns for 'ROC' and movement signals.
+
+        Notes
+        -----
+        The ROC is a momentum indicator that uses closing price to determine the trends in prices.
+        The formula used for the calculation is:
+
+            ROC = (Today's Closing Price - Closing Price n Periods Ago) / Closing Price n Periods Ago
+        """
+
+        # Calculate ROC
+        df['roc'] = (df['close'] - df['close'].shift(n)) / df['close'].shift(n)
+        
+        # Add Up or Down Indicators
+        df['movement'] = ''
+        df.loc[(df['roc'] > 0), 'movement'] = 'up'  
+        df.loc[(df['roc'] < 0), 'movement'] = 'down' 
+        
+        return df
+        
         
         
         

@@ -39,6 +39,7 @@ if __name__ == "__main__":
     obj_rsi = RelativeStrengthIndex()
     obj_msi = MoneyFlowIndex()
     obj_so = StochasticOscillator()
+    obj_roc = RateOfChange()
     
     # Get data
     df = obj_ticker_data.get_data()
@@ -59,3 +60,8 @@ if __name__ == "__main__":
     # Run SO
     so_signal = obj_backtesting.show_signals(obj_so.so(df), is_oscillator = True, latest=True)
     print(f"SO Signal {so_signal[0].title()} between {so_signal[1]} and {so_signal[2]}")
+    
+    # Run ROC
+    roc_signal = obj_roc.roc(df)
+    last_price_trend = roc_signal.movement.to_list()[-1]
+    print(f"ROC Latest Trend: {last_price_trend.title()}")
