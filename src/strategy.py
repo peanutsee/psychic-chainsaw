@@ -475,7 +475,7 @@ class RateOfChange:
     What:
     ROC is a momentum-based technical indicator that measures the percentage change in price between the current price and the price a certain number 
     of periods ago. ROC is plotted against zero. It can be used to spot divergences, overbought and oversold conditions, and centerline crossovers. 
-   
+    Mainly used to indicate an indicative change in price.
     
     How:
     Indicator moving upwards into positive = upside
