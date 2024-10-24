@@ -514,7 +514,7 @@ class RateOfChange:
         """
 
         # Calculate ROC
-        df['roc'] = (df['close'] - df['close'].shift(window=n)) / df['close'].shift(window=n)
+        df['roc'] = (df['close'] - df['close'].shift(n)) / df['close'].shift(n)
         
         # Add Up or Down Indicators
         df['movement'] = ''
